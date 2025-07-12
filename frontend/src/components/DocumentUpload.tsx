@@ -255,8 +255,10 @@ export default function DocumentUpload({ onClose }: DocumentUploadProps) {
             <input
               type="file"
               ref={fileInputRef}
-              webkitdirectory="true"
-              directory="true"
+              // @ts-ignore
+              webkitdirectory
+              // @ts-ignore
+              directory
               multiple
               onChange={handleFolderUpload}
               className="block"
