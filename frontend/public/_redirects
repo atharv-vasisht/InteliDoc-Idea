@@ -1,0 +1,8 @@
+# Handle client-side routing for Next.js App Router
+/*    /index.html   200
+
+# Handle Next.js static assets
+/_next/*    /_next/:splat    200
+
+# Handle static files
+/static/*    /static/:splat    200 

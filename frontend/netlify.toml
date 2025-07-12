@@ -5,12 +5,22 @@
 [build.environment]
   NODE_VERSION = "18"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
+# Handle client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
+  status = 200
+
+# Handle Next.js specific routes
+[[redirects]]
+  from = "/_next/*"
+  to = "/_next/:splat"
+  status = 200
+
+# Handle static assets
+[[redirects]]
+  from = "/static/*"
+  to = "/static/:splat"
   status = 200
 
 [[headers]]
