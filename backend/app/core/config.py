@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
     # Google Gemini
-    GEMINI_API_KEY: str = "AIzaSyDXwKY9Xf_iNHsPV6L7NGnf95qOZDkvOy0"
-    GEMINI_MODEL: str = "gemini-pro"
+    GEMINI_API_KEY: str = "AIzaSyDXwKY9Xf_iNHsPV6L7NGnf95qOZDkvOy0"  # Hardcoded for testing
+    GEMINI_MODEL: str = "models/gemini-2.5-flash-live-preview"
     GEMINI_MAX_TOKENS: int = 4000
     GEMINI_TEMPERATURE: float = 0.1
     
@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        # Don't override hardcoded API key with .env
+        env_ignore = ["GEMINI_API_KEY"]
 
 # Create settings instance
 settings = Settings() 
