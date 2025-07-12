@@ -8,6 +8,12 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# SPA routing - serve index.html for all routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
