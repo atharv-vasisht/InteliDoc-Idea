@@ -1,6 +1,9 @@
 # Handle client-side routing for Next.js App Router
 /*    /index.html   200
 
+# Handle API calls to backend
+/api/*    https://your-backend-url.com/api/v1/:splat    200
+
 # Handle Next.js static assets
 /_next/*    /_next/:splat    200
 
