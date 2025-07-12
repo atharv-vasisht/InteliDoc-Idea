@@ -11,9 +11,26 @@ import {
   Mapping
 } from '@/types'
 
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // If environment variable is set, use it
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+  
+  // In production (Netlify), use the backend URL
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    // Replace with your actual backend URL when deployed
+    return 'https://your-backend-url.com'
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:8000'
+}
+
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
