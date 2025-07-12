@@ -25,6 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <header className="w-full bg-primary-700 text-white py-4 shadow-md">
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+            <h1 className="text-3xl font-bold tracking-tight">InteliDoc</h1>
+            {/* Future: Chat button or chat widget can go here */}
+          </div>
+        </header>
         <div className="min-h-screen bg-gray-50">
           {children}
         </div>

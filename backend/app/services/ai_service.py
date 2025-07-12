@@ -5,6 +5,8 @@ from typing import List, Dict, Any
 from app.core.config import settings
 from app.schemas.ai import ExtractionRequest, ExtractedObligation, SummarizationRequest
 from app.models.obligation import CategoryEnum, PriorityEnum
+import re
+import os
 
 class AIService:
     def __init__(self):
@@ -39,7 +41,7 @@ Priorities:
 - medium: Important but not critical
 - low: Nice-to-have or optional requirements
 
-Return ONLY valid JSON array with no additional text or explanation."""
+Return ONLY a valid JSON array with no additional text or explanation. Do not include markdown, code blocks, or any text before or after the JSON array."""
 
         # User prompt template
         user_prompt = f"""Extract obligations or requirements from the following text. For each, provide:
@@ -76,12 +78,16 @@ Return the results as a JSON array like this:
             )
             
             content = response.text.strip()
+            print("Gemini raw response:", content)
             
-            # Parse JSON response
+            # Direct JSON parse as before
             try:
                 obligations_data = json.loads(content)
-                if not isinstance(obligations_data, list):
-                    obligations_data = [obligations_data]
+            except Exception as e:
+                print(f"JSON parsing error: {e}\nRaw response: {content}")
+                return []
+            if not isinstance(obligations_data, list):
+                obligations_data = [obligations_data]
                 
                 extracted_obligations = []
                 for item in obligations_data:
@@ -102,11 +108,6 @@ Return the results as a JSON array like this:
                     ))
                 
                 return extracted_obligations
-                
-            except json.JSONDecodeError as e:
-                print(f"JSON parsing error: {e}")
-                print(f"Raw response: {content}")
-                return []
                 
         except Exception as e:
             print(f"Gemini API error: {e}")
@@ -142,6 +143,7 @@ Provide your response as JSON:
             )
             
             content = response.text.strip()
+            print("Gemini raw response:", content)
             
             try:
                 result = json.loads(content)
@@ -150,8 +152,9 @@ Provide your response as JSON:
                     "key_points": result.get("key_points", []),
                     "processing_time": time.time() - start_time
                 }
-            except json.JSONDecodeError:
+            except Exception as e:
                 # Fallback: treat as plain text
+                print(f"JSON parsing error: {e}\nRaw response: {content}")
                 return {
                     "summary": content,
                     "key_points": [],
@@ -165,6 +168,57 @@ Provide your response as JSON:
                 "key_points": [],
                 "processing_time": time.time() - start_time
             }
+
+    def analyze_and_propose_reorg(self, folder_path: str) -> dict:
+        """Scan folder, summarize files, and propose a reorganization plan using Gemini."""
+        folder_tree = {}
+        file_summaries = {}
+        # Recursively scan folder
+        for root, dirs, files in os.walk(folder_path):
+            rel_root = os.path.relpath(root, folder_path)
+            folder_tree[rel_root] = files
+            for file in files:
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read(2000)  # Read first 2KB for summary
+                except Exception as e:
+                    content = f"[Error reading file: {e}]"
+                # Summarize file
+                summary_prompt = f"Summarize the following file for project management, compliance, and PMO context.\n\nFILENAME: {file}\nCONTENT:\n{content}\n\nReturn a 1-2 sentence summary."
+                try:
+                    model = genai.GenerativeModel(self.model)
+                    response = model.generate_content(summary_prompt)
+                    summary = response.text.strip()
+                except Exception as e:
+                    summary = f"[AI summary error: {e}]"
+                file_summaries[file_path] = summary
+        # Build prompt for reorganization
+        reorg_prompt = (
+            "You are an expert in project management and compliance document organization. "
+            "Given the following folder structure and file summaries, propose a new, more organized structure and naming convention. "
+            "Output a JSON diff of moves, renames, and new files to create. "
+            "Do not include markdown or code blocks.\n\n"
+            f"FOLDER TREE: {folder_tree}\n\nFILE SUMMARIES: {file_summaries}\n\n"
+            "Return a JSON array of changes, where each change is an object with 'action' (move, rename, create), 'source', 'destination', and 'details' fields as needed."
+        )
+        try:
+            model = genai.GenerativeModel(self.model)
+            response = model.generate_content(reorg_prompt)
+            plan = response.text.strip()
+            try:
+                plan_json = json.loads(plan)
+            except Exception as e:
+                print(f"JSON parsing error in reorg plan: {e}\nRaw response: {plan}")
+                plan_json = plan
+            return {
+                "folder_tree": folder_tree,
+                "file_summaries": file_summaries,
+                "proposed_changes": plan_json
+            }
+        except Exception as e:
+            print(f"Gemini API error in reorg: {e}")
+            return {"error": str(e)}
 
     def _map_category(self, category_str: str) -> CategoryEnum:
         """Map string category to CategoryEnum"""

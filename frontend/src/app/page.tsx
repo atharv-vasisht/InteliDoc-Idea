@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { 
   DocumentTextIcon, 
   MagnifyingGlassIcon, 
@@ -10,9 +10,25 @@ import {
 } from '@heroicons/react/24/outline'
 import DocumentUpload from '@/components/DocumentUpload'
 import FeatureCard from '@/components/FeatureCard'
+import ChatReorg from '@/components/ChatReorg'
 
 export default function HomePage() {
   const [showUpload, setShowUpload] = useState(false)
+  const [unstaged, setUnstaged] = useState<any>(null)
+  const [loadingUnstaged, setLoadingUnstaged] = useState(false)
+
+  const fetchUnstaged = async () => {
+    setLoadingUnstaged(true)
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/ai/propose-reorg', { method: 'POST' })
+      const data = await res.json()
+      setUnstaged(data)
+    } catch (e) {
+      setUnstaged({ error: 'Failed to fetch unstaged changes.' })
+    } finally {
+      setLoadingUnstaged(false)
+    }
+  }
 
   const features = [
     {
@@ -88,6 +104,45 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Unstaged Changes Section */}
+      <div className="py-12 bg-white border-t border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">Unstaged AI-Proposed Changes</h2>
+            <button onClick={fetchUnstaged} className="btn-primary" disabled={loadingUnstaged}>
+              {loadingUnstaged ? 'Loading...' : 'Fetch Unstaged Changes'}
+            </button>
+          </div>
+          {unstaged ? (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              {unstaged.error ? (
+                <div className="text-red-600">{unstaged.error}</div>
+              ) : (
+                <>
+                  <div className="mb-4">
+                    <h3 className="font-semibold mb-1">Current Folder Tree:</h3>
+                    <pre className="bg-white p-2 rounded text-xs overflow-x-auto border border-gray-100">{JSON.stringify(unstaged.folder_tree, null, 2)}</pre>
+                  </div>
+                  <div className="mb-4">
+                    <h3 className="font-semibold mb-1">File Summaries:</h3>
+                    <pre className="bg-white p-2 rounded text-xs overflow-x-auto border border-gray-100">{JSON.stringify(unstaged.file_summaries, null, 2)}</pre>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Proposed Changes:</h3>
+                    <pre className="bg-white p-2 rounded text-xs overflow-x-auto border border-gray-100">{typeof unstaged.proposed_changes === 'string' ? unstaged.proposed_changes : JSON.stringify(unstaged.proposed_changes, null, 2)}</pre>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="text-gray-500">No unstaged changes loaded yet.</div>
+          )}
+        </div>
+      </div>
+
+      {/* Chat Reorg Section */}
+      <ChatReorg />
 
       {/* Features Section */}
       <div className="py-24 bg-white">
