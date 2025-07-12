@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
     # Google Gemini
-    GEMINI_API_KEY: str = ""
+    GEMINI_API_KEY: str = "AIzaSyDXwKY9Xf_iNHsPV6L7NGnf95qOZDkvOy0"
     GEMINI_MODEL: str = "gemini-pro"
     GEMINI_MAX_TOKENS: int = 4000
     GEMINI_TEMPERATURE: float = 0.1
