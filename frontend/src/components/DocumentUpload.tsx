@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { 
   XMarkIcon, 
@@ -43,7 +43,11 @@ export default function DocumentUpload({ onClose }: DocumentUploadProps) {
   const [results, setResults] = useState<{
     obligations: ExtractedObligation[]
     summary?: SummarizationResponse
+    folderFiles?: string[] // Added for folder upload
   } | null>(null)
+  const [chatInput, setChatInput] = useState('')
+  const [chatHistory, setChatHistory] = useState<{role: 'user'|'ai', message: string, changes?: any}[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const processText = async (text: string, documentTitle?: string) => {
     try {
@@ -137,6 +141,52 @@ export default function DocumentUpload({ onClose }: DocumentUploadProps) {
     }
   }, [])
 
+  // Folder upload handler
+  const handleFolderUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setIsProcessing(true)
+    setResults(null)
+    try {
+      // Gather all files and their relative paths
+      const fileList = Array.from(files).map(f => ({
+        file: f,
+        relativePath: (f as any).webkitRelativePath || f.name
+      }))
+      // For MVP, just send file names/paths to backend (not actual content)
+      const fileMeta = fileList.map(f => f.relativePath)
+      setResults({ obligations: [], summary: undefined, folderFiles: fileMeta })
+      toast.success(`Uploaded folder with ${fileList.length} files!`)
+    } catch (error) {
+      toast.error('Error processing folder')
+      console.error('Folder upload error:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Chat send handler
+  const sendChat = async () => {
+    if (!chatInput.trim()) return
+    setChatHistory(h => [...h, { role: 'user', message: chatInput }])
+    setIsProcessing(true)
+    try {
+      // For now, just send the chat message to the backend chat-reorg endpoint
+      const res = await fetch('http://localhost:8000/api/v1/ai/chat-reorg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: chatInput })
+      })
+      const data = await res.json()
+      setChatHistory(h => [...h, { role: 'ai', message: 'Here are the proposed changes:', changes: data.proposed_changes }])
+    } catch (e) {
+      setChatHistory(h => [...h, { role: 'ai', message: 'Error: Could not get a response from the AI.' }])
+    } finally {
+      setIsProcessing(false)
+      setChatInput('')
+    }
+  }
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -194,110 +244,147 @@ export default function DocumentUpload({ onClose }: DocumentUploadProps) {
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Document Intelligence</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
-
         <div className="p-6">
-          {!results ? (
-            <>
-              {/* Tab Navigation */}
-              <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+          {/* Folder Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Upload a Folder</label>
+            <input
+              type="file"
+              ref={fileInputRef}
+              webkitdirectory="true"
+              directory="true"
+              multiple
+              onChange={handleFolderUpload}
+              className="block"
+            />
+          </div>
+          {/* Tab Navigation */}
+          <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('file')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'file'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Upload File
+            </button>
+            <button
+              onClick={() => setActiveTab('text')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'text'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Paste Text
+            </button>
+          </div>
+
+          {/* File Upload Tab */}
+          {activeTab === 'file' && (
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                isDragActive
+                  ? 'border-primary-500 bg-primary-50'
+                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+              }`}
+            >
+              <input {...getInputProps()} />
+              <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              {isDragActive ? (
+                <p className="text-primary-600 font-medium">Drop the file here...</p>
+              ) : (
+                <div>
+                  <p className="text-gray-600 mb-2">
+                    Drag and drop a file here, or click to select
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Supports TXT files (PDF and DOCX coming soon)
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Text Input Tab */}
+          {activeTab === 'text' && (
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="text-input" className="block text-sm font-medium text-gray-700 mb-2">
+                  Paste your text here
+                </label>
+                <textarea
+                  id="text-input"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Paste your document text, requirements, obligations, or any unstructured content here..."
+                  className="input-field h-64 resize-none"
+                  disabled={isProcessing}
+                />
+              </div>
+              <div className="flex justify-end">
                 <button
-                  onClick={() => setActiveTab('file')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === 'file'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                  onClick={handleTextSubmit}
+                  disabled={isProcessing || !textInput.trim()}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Upload File
-                </button>
-                <button
-                  onClick={() => setActiveTab('text')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === 'text'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Paste Text
+                  {isProcessing ? 'Processing...' : 'Process Text'}
                 </button>
               </div>
+            </div>
+          )}
 
-              {/* File Upload Tab */}
-              {activeTab === 'file' && (
-                <div
-                  {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                    isDragActive
-                      ? 'border-primary-500 bg-primary-50'
-                      : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
-                  }`}
-                >
-                  <input {...getInputProps()} />
-                  <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  {isDragActive ? (
-                    <p className="text-primary-600 font-medium">Drop the file here...</p>
-                  ) : (
-                    <div>
-                      <p className="text-gray-600 mb-2">
-                        Drag and drop a file here, or click to select
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Supports TXT files (PDF and DOCX coming soon)
-                      </p>
-                    </div>
+          {/* Processing State */}
+          {isProcessing && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mr-3"></div>
+                <span className="text-blue-800">
+                  Processing your {activeTab === 'file' ? 'document' : 'text'} with AI...
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Chat UI */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-2">AI Chat for File/Folder Organization</h3>
+            <div className="space-y-3 mb-3 max-h-48 overflow-y-auto">
+              {chatHistory.map((msg, i) => (
+                <div key={i} className={msg.role === 'user' ? 'text-right' : 'text-left'}>
+                  <div className={msg.role === 'user' ? 'inline-block bg-blue-100 text-blue-900 px-3 py-2 rounded-lg' : 'inline-block bg-gray-100 text-gray-900 px-3 py-2 rounded-lg'}>
+                    {msg.message}
+                  </div>
+                  {msg.changes && (
+                    <pre className="bg-gray-50 border border-gray-200 rounded p-2 mt-2 text-xs overflow-x-auto">{typeof msg.changes === 'string' ? msg.changes : JSON.stringify(msg.changes, null, 2)}</pre>
                   )}
                 </div>
-              )}
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                className="input-field flex-1"
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') sendChat() }}
+                placeholder="Ask the AI to reorganize, rename, or summarize..."
+                disabled={isProcessing}
+              />
+              <button className="btn-primary" onClick={sendChat} disabled={isProcessing || !chatInput.trim()}>
+                {isProcessing ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+          </div>
 
-              {/* Text Input Tab */}
-              {activeTab === 'text' && (
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="text-input" className="block text-sm font-medium text-gray-700 mb-2">
-                      Paste your text here
-                    </label>
-                    <textarea
-                      id="text-input"
-                      value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
-                      placeholder="Paste your document text, requirements, obligations, or any unstructured content here..."
-                      className="input-field h-64 resize-none"
-                      disabled={isProcessing}
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleTextSubmit}
-                      disabled={isProcessing || !textInput.trim()}
-                      className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isProcessing ? 'Processing...' : 'Process Text'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Processing State */}
-              {isProcessing && (
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mr-3"></div>
-                    <span className="text-blue-800">
-                      Processing your {activeTab === 'file' ? 'document' : 'text'} with AI...
-                    </span>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            /* Results Display */
+          {/* Results Display */}
+          {results && (
             <div className="space-y-6">
               {/* Summary Section */}
               {results.summary && (

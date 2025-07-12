@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends, Body, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 import time
@@ -129,3 +129,11 @@ async def chat_reorg(
     except Exception as e:
         print(f"Gemini API error in chat-reorg: {e}")
         return {"error": str(e)} 
+
+@router.post("/upload-folder")
+async def upload_folder(files: List[UploadFile] = File(...), relative_paths: List[str] = Form(...)):
+    """Accept multiple files with relative paths for folder upload."""
+    # For MVP, just log the file names and paths
+    file_info = [{"filename": f.filename, "relative_path": p} for f, p in zip(files, relative_paths)]
+    print("Received folder upload:", file_info)
+    return {"status": "success", "files": file_info} 
