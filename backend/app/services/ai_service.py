@@ -1,7 +1,7 @@
 import google.generativeai as genai
 import time
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from app.core.config import settings
 from app.schemas.ai import ExtractionRequest, ExtractedObligation, SummarizationRequest
 from app.models.obligation import CategoryEnum, PriorityEnum
@@ -17,53 +17,75 @@ class AIService:
 
     def extract_obligations(self, request: ExtractionRequest) -> List[ExtractedObligation]:
         """
-        Extract obligations/requirements from text using GPT-4
+        Extract obligations/requirements from text using enhanced enterprise-focused prompts
         """
         start_time = time.time()
         
-        # System prompt based on the business plan design
-        system_prompt = """You are a compliance and requirements extraction expert. Given unstructured text, your job is to extract clear, actionable obligations or requirements, classify them by category, and return them as structured JSON.
+        # Enhanced system prompt for enterprise use cases
+        system_prompt = """You are an enterprise compliance and requirements intelligence expert specializing in PMO, GRC, and product management. Your role is to extract actionable obligations, requirements, and compliance items from unstructured documents and transform them into structured, traceable data.
 
-Your task is to identify specific, actionable obligations or requirements that can be mapped to internal processes, policies, or backlog items. Focus on concrete, implementable items rather than general statements.
+Your expertise covers:
+- Regulatory compliance (SOX, GDPR, HIPAA, FedRAMP, etc.)
+- Contract obligations and vendor requirements
+- Product requirements and feature specifications
+- Operational procedures and policies
+- Risk management and audit requirements
+
+For each extracted item, provide:
+- Specific, actionable text that can be mapped to internal processes
+- Appropriate categorization for enterprise systems
+- Priority based on business impact and regulatory requirements
+- Source context for traceability
 
 Categories to use:
-- privacy: Data protection, user rights, consent requirements
-- security: Encryption, access controls, security measures
-- payments: Payment processing, financial requirements
-- ux: User experience, interface requirements
-- compliance: Regulatory compliance, audit requirements
-- legal: Legal obligations, contract terms
-- operations: Operational processes, procedures
+- privacy: Data protection, user rights, consent, GDPR, CCPA requirements
+- security: Encryption, access controls, security frameworks, SOC2, ISO27001
+- payments: Payment processing, PCI DSS, financial regulations
+- ux: User experience, accessibility, interface requirements
+- compliance: Regulatory compliance, audit requirements, certifications
+- legal: Contract terms, legal obligations, liability requirements
+- operations: Operational processes, procedures, SLAs, KPIs
+- risk: Risk management, mitigation requirements, controls
 - other: Anything that doesn't fit the above categories
 
 Priorities:
-- high: Critical, must-have requirements
-- medium: Important but not critical
+- high: Critical compliance, legal, or business requirements
+- medium: Important operational or process requirements
 - low: Nice-to-have or optional requirements
 
-Return ONLY a valid JSON array with no additional text or explanation. Do not include markdown, code blocks, or any text before or after the JSON array."""
+Return ONLY a valid JSON array with no additional text."""
 
-        # User prompt template
-        user_prompt = f"""Extract obligations or requirements from the following text. For each, provide:
-
-- obligation_text: The extracted obligation or requirement (be specific and actionable)
-- category: A best-guess category (privacy, security, payments, ux, compliance, legal, operations, other)
-- priority: High/Medium/Low (if indicated in text, otherwise use Medium)
-- source_section: Which section or heading it was found in (if possible)
+        # Enhanced user prompt with enterprise context
+        user_prompt = f"""Extract obligations, requirements, or compliance items from the following enterprise document. Focus on items that can be:
+1. Mapped to internal policies, controls, or Jira tickets
+2. Tracked for compliance and audit purposes
+3. Used for requirement traceability
+4. Integrated into project management workflows
 
 Document Title: {request.document_title or 'Unknown'}
 Document Type: {request.document_type or 'General'}
+Business Context: {getattr(request, 'business_context', 'Enterprise document analysis')}
+
+For each item, provide:
+- obligation_text: Specific, actionable requirement or obligation
+- category: Best-fit category for enterprise systems
+- priority: High/Medium/Low based on business impact
+- source_section: Section or heading where found
+- business_impact: Brief description of business impact (optional)
+- compliance_framework: Relevant compliance framework if applicable (optional)
 
 TEXT:
 {request.text}
 
-Return the results as a JSON array like this:
+Return as JSON array:
 [
   {{
-    "obligation_text": "Ensure all customer data is encrypted in transit.",
+    "obligation_text": "Implement multi-factor authentication for all user accounts",
     "category": "security",
     "priority": "high",
-    "source_section": "Data Protection Requirements"
+    "source_section": "Security Requirements",
+    "business_impact": "Critical for SOC2 compliance and data protection",
+    "compliance_framework": "SOC2, ISO27001"
   }}
 ]"""
 
@@ -80,34 +102,37 @@ Return the results as a JSON array like this:
             content = response.text.strip()
             print("Gemini raw response:", content)
             
-            # Direct JSON parse as before
+            # Parse JSON response
             try:
                 obligations_data = json.loads(content)
             except Exception as e:
                 print(f"JSON parsing error: {e}\nRaw response: {content}")
                 return []
+                
             if not isinstance(obligations_data, list):
                 obligations_data = [obligations_data]
                 
-                extracted_obligations = []
-                for item in obligations_data:
-                    # Validate and convert category
-                    category_str = item.get("category", "other").lower()
-                    category = self._map_category(category_str)
-                    
-                    # Validate and convert priority
-                    priority_str = item.get("priority", "medium").lower()
-                    priority = self._map_priority(priority_str)
-                    
-                    extracted_obligations.append(ExtractedObligation(
-                        obligation_text=item.get("obligation_text", ""),
-                        category=category,
-                        priority=priority,
-                        source_section=item.get("source_section"),
-                        confidence_score=85  # Default confidence for Gemini
-                    ))
+            extracted_obligations = []
+            for item in obligations_data:
+                # Validate and convert category
+                category_str = item.get("category", "other").lower()
+                category = self._map_category(category_str)
                 
-                return extracted_obligations
+                # Validate and convert priority
+                priority_str = item.get("priority", "medium").lower()
+                priority = self._map_priority(priority_str)
+                
+                extracted_obligations.append(ExtractedObligation(
+                    obligation_text=item.get("obligation_text", ""),
+                    category=category,
+                    priority=priority,
+                    source_section=item.get("source_section"),
+                    confidence_score=85,  # Default confidence for Gemini
+                    business_impact=item.get("business_impact"),
+                    compliance_framework=item.get("compliance_framework")
+                ))
+            
+            return extracted_obligations
                 
         except Exception as e:
             print(f"Gemini API error: {e}")
@@ -168,6 +193,94 @@ Provide your response as JSON:
                 "key_points": [],
                 "processing_time": time.time() - start_time
             }
+
+    def analyze_document_structure(self, text: str, document_type: str = "general") -> Dict[str, Any]:
+        """
+        Analyze document structure and extract metadata for enterprise document management
+        """
+        system_prompt = """You are an expert in enterprise document analysis and information governance. Analyze the structure and content of documents to extract metadata useful for PMO, compliance, and project management."""
+
+        user_prompt = f"""Analyze the following document and extract structural metadata:
+
+Document Type: {document_type}
+
+TEXT:
+{text}
+
+Provide analysis as JSON:
+{{
+  "document_type": "contract|policy|requirement|procedure|other",
+  "key_sections": ["section1", "section2", "section3"],
+  "stakeholders": ["role1", "role2"],
+  "compliance_areas": ["framework1", "framework2"],
+  "risk_level": "low|medium|high",
+  "action_items_count": 0,
+  "deadlines": ["date1", "date2"],
+  "summary": "Brief document summary"
+}}"""
+
+        try:
+            model = genai.GenerativeModel(self.model)
+            response = model.generate_content(
+                f"{system_prompt}\n\n{user_prompt}",
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=1000,
+                    temperature=0.3
+                )
+            )
+            
+            content = response.text.strip()
+            try:
+                return json.loads(content)
+            except Exception as e:
+                print(f"JSON parsing error: {e}")
+                return {"error": "Failed to parse document structure"}
+                
+        except Exception as e:
+            print(f"Document structure analysis error: {e}")
+            return {"error": "Failed to analyze document structure"}
+
+    def generate_compliance_mapping(self, obligation_text: str, existing_controls: List[str]) -> Dict[str, Any]:
+        """
+        Generate compliance mapping suggestions for obligations
+        """
+        system_prompt = """You are a GRC expert specializing in mapping requirements to internal controls and compliance frameworks."""
+
+        user_prompt = f"""Given this obligation: "{obligation_text}"
+
+And these existing internal controls: {existing_controls}
+
+Suggest mappings and identify gaps. Return as JSON:
+{{
+  "suggested_mappings": [
+    {{"obligation": "obligation_text", "control": "control_name", "confidence": 0.85}}
+  ],
+  "gap_analysis": [
+    {{"gap": "description", "risk_level": "high|medium|low", "recommended_action": "action"}}
+  ],
+  "compliance_frameworks": ["framework1", "framework2"]
+}}"""
+
+        try:
+            model = genai.GenerativeModel(self.model)
+            response = model.generate_content(
+                f"{system_prompt}\n\n{user_prompt}",
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=1000,
+                    temperature=0.3
+                )
+            )
+            
+            content = response.text.strip()
+            try:
+                return json.loads(content)
+            except Exception as e:
+                print(f"Compliance mapping error: {e}")
+                return {"error": "Failed to generate compliance mapping"}
+                
+        except Exception as e:
+            print(f"Compliance mapping error: {e}")
+            return {"error": "Failed to generate compliance mapping"}
 
     def analyze_and_propose_reorg(self, folder_path: str) -> dict:
         """Scan folder, summarize files, and propose a reorganization plan using Gemini."""
