@@ -36,6 +36,7 @@ export default function RootLayout({
               <a href="/#upload" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">Upload</a>
               <a href="/#chat" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">AI Chat</a>
               <Link href="/analytics" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">Analytics</Link>
+              <Link href="/cross-platform" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">Cross-Platform</Link>
               <Link href="/about" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">About</Link>
             </nav>
           </div>
