@@ -125,19 +125,19 @@ export default function EnterpriseDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Enterprise Dashboard</h1>
-            <p className="text-gray-600 mt-1">Comprehensive view for PMO, GRC, and Product Management</p>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Enterprise Dashboard</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Comprehensive view for PMO, GRC, and Product Management</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${getRiskLevelColor(stats.riskLevel)}`}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getRiskLevelColor(stats.riskLevel)}`}>
               Risk Level: {stats.riskLevel.toUpperCase()}
             </div>
-            <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
+            <button className="bg-primary-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base">
               Generate Report
             </button>
           </div>
@@ -145,54 +145,54 @@ export default function EnterpriseDashboard() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <DocumentTextIcon className="h-8 w-8 text-blue-600" />
+              <DocumentTextIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Obligations</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalObligations}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Obligations</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalObligations}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
+              <CheckCircleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Mapped</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.mappedObligations}</p>
-              <p className="text-sm text-gray-500">
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Mapped</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.mappedObligations}</p>
+              <p className="text-xs sm:text-sm text-gray-500">
                 {stats.totalObligations > 0 ? Math.round((stats.mappedObligations / stats.totalObligations) * 100) : 0}% coverage
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <ExclamationTriangleIcon className="h-8 w-8 text-orange-600" />
+              <ExclamationTriangleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">High Priority</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.highPriorityObligations}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">High Priority</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.highPriorityObligations}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <ShieldCheckIcon className="h-8 w-8 text-purple-600" />
+              <ShieldCheckIcon className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Compliance Gaps</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.complianceGaps}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Compliance Gaps</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.complianceGaps}</p>
             </div>
           </div>
         </div>

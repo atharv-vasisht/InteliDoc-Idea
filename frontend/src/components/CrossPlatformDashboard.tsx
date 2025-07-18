@@ -135,18 +135,18 @@ export default function CrossPlatformDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Cross-Platform Intelligence Agent</h1>
-            <p className="text-gray-600 mt-1">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Cross-Platform Intelligence Agent</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
               Enterprise-wide AI monitoring across M365, SAP, Salesforce, and other platforms with GRC cross-validation
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
               report.risk_assessment.overall_risk === 'high' ? 'text-red-600 bg-red-100' :
               report.risk_assessment.overall_risk === 'medium' ? 'text-yellow-600 bg-yellow-100' :
               'text-green-600 bg-green-100'
@@ -156,18 +156,19 @@ export default function CrossPlatformDashboard() {
             <button
               onClick={refreshData}
               disabled={refreshing}
-              className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+              className="flex items-center space-x-2 bg-primary-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 text-sm sm:text-base"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+              <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+              <span className="sm:hidden">{refreshing ? '...' : '↻'}</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <nav className="flex space-x-8">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-4">
+        <nav className="flex flex-wrap sm:flex-nowrap space-x-2 sm:space-x-8 overflow-x-auto">
           {[
             { id: 'overview', name: 'Overview', icon: EyeIcon },
             { id: 'platforms', name: 'Platforms', icon: GlobeAltIcon },
@@ -179,14 +180,15 @@ export default function CrossPlatformDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                <span>{tab.name}</span>
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden xs:inline">{tab.name}</span>
+                <span className="xs:hidden">{tab.name.split(' ')[0]}</span>
               </button>
             )
           })}
@@ -215,47 +217,47 @@ function OverviewTab({ report }: { report: CrossPlatformReport }) {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Cross-Platform Intelligence Overview</h2>
+    <div className="p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Cross-Platform Intelligence Overview</h2>
       
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gray-50 rounded-lg p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
           <div className="flex items-center">
-            <GlobeAltIcon className="h-8 w-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Platforms Monitored</p>
-              <p className="text-2xl font-bold text-gray-900">{report.risk_assessment.platforms_monitored}</p>
+            <GlobeAltIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Platforms Monitored</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{report.risk_assessment.platforms_monitored}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
           <div className="flex items-center">
-            <DocumentTextIcon className="h-8 w-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Items Analyzed</p>
-              <p className="text-2xl font-bold text-gray-900">{report.risk_assessment.total_items_analyzed}</p>
+            <DocumentTextIcon className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Items Analyzed</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{report.risk_assessment.total_items_analyzed}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
           <div className="flex items-center">
-            <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">High Risk Issues</p>
-              <p className="text-2xl font-bold text-gray-900">{report.risk_assessment.high_risk_discrepancies}</p>
+            <ExclamationTriangleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">High Risk Issues</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{report.risk_assessment.high_risk_discrepancies}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
           <div className="flex items-center">
-            <ShieldCheckIcon className="h-8 w-8 text-purple-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Discrepancies</p>
-              <p className="text-2xl font-bold text-gray-900">
+            <ShieldCheckIcon className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Discrepancies</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">
                 {report.risk_assessment.high_risk_discrepancies + 
                  report.risk_assessment.medium_risk_discrepancies + 
                  report.risk_assessment.low_risk_discrepancies}
@@ -266,18 +268,18 @@ function OverviewTab({ report }: { report: CrossPlatformReport }) {
       </div>
 
       {/* Platform Activity Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-4">Platform Activity Summary</h3>
-          <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Platform Activity Summary</h3>
+          <div className="space-y-2 sm:space-y-3">
             {Object.entries(report.platform_summary).map(([key, platform]) => (
-              <div key={key} className="flex items-center justify-between p-3 bg-white rounded-lg">
+              <div key={key} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 bg-white rounded-lg space-y-1 sm:space-y-0">
                 <div>
-                  <p className="font-medium text-gray-900">{platform.name}</p>
-                  <p className="text-sm text-gray-600">{platform.items_count} items</p>
+                  <p className="font-medium text-gray-900 text-sm sm:text-base">{platform.name}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{platform.items_count} items</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">
+                <div className="text-left sm:text-right">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     {platform.last_activity ? new Date(platform.last_activity).toLocaleDateString() : 'No activity'}
                   </p>
                   <p className="text-xs text-gray-500">{platform.data_types.length} data types</p>
@@ -287,25 +289,25 @@ function OverviewTab({ report }: { report: CrossPlatformReport }) {
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-4">Risk Assessment</h3>
-          <div className="space-y-4">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Risk Assessment</h3>
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">High Risk Discrepancies</span>
-              <span className="text-sm font-medium text-red-600">{report.risk_assessment.high_risk_discrepancies}</span>
+              <span className="text-xs sm:text-sm text-gray-600">High Risk Discrepancies</span>
+              <span className="text-xs sm:text-sm font-medium text-red-600">{report.risk_assessment.high_risk_discrepancies}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Medium Risk Discrepancies</span>
-              <span className="text-sm font-medium text-yellow-600">{report.risk_assessment.medium_risk_discrepancies}</span>
+              <span className="text-xs sm:text-sm text-gray-600">Medium Risk Discrepancies</span>
+              <span className="text-xs sm:text-sm font-medium text-yellow-600">{report.risk_assessment.medium_risk_discrepancies}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Low Risk Discrepancies</span>
-              <span className="text-sm font-medium text-green-600">{report.risk_assessment.low_risk_discrepancies}</span>
+              <span className="text-xs sm:text-sm text-gray-600">Low Risk Discrepancies</span>
+              <span className="text-xs sm:text-sm font-medium text-green-600">{report.risk_assessment.low_risk_discrepancies}</span>
             </div>
-            <div className="pt-4 border-t border-gray-200">
+            <div className="pt-3 sm:pt-4 border-t border-gray-200">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-900">Overall Risk Level</span>
-                <span className={`text-sm font-medium ${getRiskLevelColor(report.risk_assessment.overall_risk)}`}>
+                <span className="text-xs sm:text-sm font-medium text-gray-900">Overall Risk Level</span>
+                <span className={`text-xs sm:text-sm font-medium ${getRiskLevelColor(report.risk_assessment.overall_risk)}`}>
                   {report.risk_assessment.overall_risk.toUpperCase()}
                 </span>
               </div>
@@ -319,19 +321,19 @@ function OverviewTab({ report }: { report: CrossPlatformReport }) {
 
 function PlatformsTab({ report, getPlatformIcon }: { report: CrossPlatformReport, getPlatformIcon: (name: string) => any }) {
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Platform Monitoring</h2>
+    <div className="p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Platform Monitoring</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {Object.entries(report.platform_summary).map(([key, platform]) => {
           const Icon = getPlatformIcon(platform.name)
           return (
-            <div key={key} className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center mb-4">
-                <Icon className="h-8 w-8 text-blue-600" />
-                <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">{platform.name}</h3>
-                  <p className="text-sm text-gray-600">{platform.items_count} items</p>
+            <div key={key} className="bg-gray-50 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center mb-3 sm:mb-4">
+                <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                <div className="ml-2 sm:ml-3">
+                  <h3 className="font-medium text-gray-900 text-sm sm:text-base">{platform.name}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">{platform.items_count} items</p>
                 </div>
               </div>
               
@@ -340,7 +342,7 @@ function PlatformsTab({ report, getPlatformIcon }: { report: CrossPlatformReport
                   <p className="text-xs font-medium text-gray-600">Data Types</p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {platform.data_types.map((type, index) => (
-                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                      <span key={index} className="px-1 sm:px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
                         {type}
                       </span>
                     ))}
@@ -349,12 +351,12 @@ function PlatformsTab({ report, getPlatformIcon }: { report: CrossPlatformReport
                 
                 <div>
                   <p className="text-xs font-medium text-gray-600">Active Users</p>
-                  <p className="text-sm text-gray-900">{platform.users.length} users</p>
+                  <p className="text-xs sm:text-sm text-gray-900">{platform.users.length} users</p>
                 </div>
                 
                 <div>
                   <p className="text-xs font-medium text-gray-600">Last Activity</p>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-xs sm:text-sm text-gray-900">
                     {platform.last_activity ? new Date(platform.last_activity).toLocaleString() : 'No activity'}
                   </p>
                 </div>
@@ -373,46 +375,46 @@ function DiscrepanciesTab({ report, getSeverityColor, getRiskLevelColor }: {
   getRiskLevelColor: (risk: string) => string 
 }) {
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">GRC Cross-Validation Discrepancies</h2>
+    <div className="p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">GRC Cross-Validation Discrepancies</h2>
       
       {report.grc_discrepancies.length === 0 ? (
-        <div className="text-center py-8">
-          <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <p className="text-gray-600">No GRC discrepancies detected across platforms</p>
+        <div className="text-center py-6 sm:py-8">
+          <CheckCircleIcon className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
+          <p className="text-gray-600 text-sm sm:text-base">No GRC discrepancies detected across platforms</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {report.grc_discrepancies.map((discrepancy, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSeverityColor(discrepancy.severity)}`}>
+            <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4 space-y-2 sm:space-y-0">
+                <div className="flex flex-wrap items-center space-x-2 sm:space-x-3">
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getSeverityColor(discrepancy.severity)}`}>
                     {discrepancy.severity.toUpperCase()}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRiskLevelColor(discrepancy.risk_level)}`}>
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getRiskLevelColor(discrepancy.risk_level)}`}>
                     {discrepancy.risk_level.toUpperCase()} RISK
                   </span>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">
+                <div className="text-left sm:text-right">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     {new Date(discrepancy.detected_at).toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500">{discrepancy.items_count} items involved</p>
                 </div>
               </div>
               
-              <div className="mb-4">
-                <h3 className="font-medium text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-700">{discrepancy.description}</p>
+              <div className="mb-3 sm:mb-4">
+                <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Description</h3>
+                <p className="text-gray-700 text-sm sm:text-base">{discrepancy.description}</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Platforms Involved</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Platforms Involved</h4>
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
                     {discrepancy.platforms_involved.map((platform, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded">
+                      <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-800 text-xs sm:text-sm rounded">
                         {platform}
                       </span>
                     ))}
@@ -420,14 +422,14 @@ function DiscrepanciesTab({ report, getSeverityColor, getRiskLevelColor }: {
                 </div>
                 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Compliance Framework</h4>
-                  <p className="text-gray-700">{discrepancy.compliance_framework}</p>
+                  <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Compliance Framework</h4>
+                  <p className="text-gray-700 text-sm sm:text-base">{discrepancy.compliance_framework}</p>
                 </div>
               </div>
               
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Recommended Action</h4>
-                <p className="text-gray-700">{discrepancy.recommended_action}</p>
+                <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Recommended Action</h4>
+                <p className="text-gray-700 text-sm sm:text-base">{discrepancy.recommended_action}</p>
               </div>
             </div>
           ))}
@@ -439,40 +441,40 @@ function DiscrepanciesTab({ report, getSeverityColor, getRiskLevelColor }: {
 
 function InsightsTab({ report }: { report: CrossPlatformReport }) {
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Intelligence Insights</h2>
+    <div className="p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Intelligence Insights</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-4">AI-Generated Insights</h3>
-          <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">AI-Generated Insights</h3>
+          <div className="space-y-2 sm:space-y-3">
             {report.intelligence_insights.map((insight, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-white rounded-lg">
-                <ChartBarIcon className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-gray-700">{insight}</p>
+              <div key={index} className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 bg-white rounded-lg">
+                <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-xs sm:text-sm text-gray-700">{insight}</p>
               </div>
             ))}
           </div>
         </div>
         
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-4">Report Information</h3>
-          <div className="space-y-3">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Report Information</h3>
+          <div className="space-y-2 sm:space-y-3">
             <div>
-              <p className="text-sm font-medium text-gray-600">Report Generated</p>
-              <p className="text-sm text-gray-900">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Report Generated</p>
+              <p className="text-xs sm:text-sm text-gray-900">
                 {new Date(report.report_generated_at).toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Analysis Coverage</p>
-              <p className="text-sm text-gray-900">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Analysis Coverage</p>
+              <p className="text-xs sm:text-sm text-gray-900">
                 {report.risk_assessment.platforms_monitored} platforms, {report.risk_assessment.total_items_analyzed} items
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Cross-Validation Results</p>
-              <p className="text-sm text-gray-900">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Cross-Validation Results</p>
+              <p className="text-xs sm:text-sm text-gray-900">
                 {report.grc_discrepancies.length} discrepancies detected
               </p>
             </div>

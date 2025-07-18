@@ -31,13 +31,13 @@ export default function RootLayout({
             <div className="flex items-center gap-3">
               <span className="text-primary-700 text-2xl font-extrabold tracking-tight">InteliDoc</span>
             </div>
-            <nav className="flex gap-4">
-              <Link href="/" scroll={true} className="px-5 py-2 rounded-full bg-primary-700 text-white font-semibold shadow hover:bg-primary-800 transition-all duration-150">Home</Link>
-              <a href="/#upload" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">Upload</a>
-              <a href="/#chat" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">AI Chat</a>
-              <Link href="/analytics" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">Analytics</Link>
-              <Link href="/cross-platform" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">Cross-Platform</Link>
-              <Link href="/about" className="px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150">About</Link>
+            <nav className="flex flex-wrap gap-2 sm:gap-4">
+              <Link href="/" scroll={true} className="px-3 sm:px-5 py-2 rounded-full bg-primary-700 text-white font-semibold shadow hover:bg-primary-800 transition-all duration-150 text-sm sm:text-base">Home</Link>
+              <a href="/#upload" className="px-3 sm:px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150 text-sm sm:text-base">Upload</a>
+              <a href="/#chat" className="px-3 sm:px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150 text-sm sm:text-base">AI Chat</a>
+              <Link href="/analytics" className="px-3 sm:px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150 text-sm sm:text-base">Analytics</Link>
+              <Link href="/cross-platform" className="px-3 sm:px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150 text-sm sm:text-base">Cross-Platform</Link>
+              <Link href="/about" className="px-3 sm:px-5 py-2 rounded-full bg-gray-200 text-primary-700 font-semibold shadow hover:bg-primary-100 hover:text-primary-800 transition-all duration-150 text-sm sm:text-base">About</Link>
             </nav>
           </div>
         </header>

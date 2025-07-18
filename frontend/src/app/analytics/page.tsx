@@ -46,32 +46,33 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Analytics & Intelligence</h1>
-          <p className="text-gray-600 mt-2">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics & Intelligence</h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
             Comprehensive analytics for enterprise document management, compliance tracking, and requirement traceability
           </p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mb-8">
-          <nav className="flex space-x-8">
+        <div className="mb-6 sm:mb-8">
+          <nav className="flex flex-wrap sm:flex-nowrap space-x-2 sm:space-x-8 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`flex items-center space-x-1 sm:space-x-2 py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-primary-500 text-primary-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span>{tab.name}</span>
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden xs:inline">{tab.name}</span>
+                  <span className="xs:hidden">{tab.name.split(' ')[0]}</span>
                 </button>
               )
             })}
